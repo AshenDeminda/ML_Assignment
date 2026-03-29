@@ -1,0 +1,75 @@
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# ── Virtual environment ───────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+virtualenv/
+
+# ── ML model files (too large for git) ───────────────────
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.model
+*.pt
+*.pth
+
+# ── Jupyter / Colab ───────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+__pycache__/
+
+# ── Environment variables ─────────────────────────────────
+.env
+.env.local
+.env.production
+.env.*
+
+# ── VS Code ───────────────────────────────────────────────
+.vscode/
+*.code-workspace
+
+# ── OS files ──────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── Logs ─────────────────────────────────────────────────
+*.log
+logs/
+uvicorn.log
+
+# ── Data files (usually too large for git) ───────────────
+*.csv
+*.xlsx
+*.xls
+*.json
+data/
+
+# ── Test / coverage ───────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
