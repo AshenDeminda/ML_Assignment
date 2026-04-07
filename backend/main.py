@@ -97,11 +97,20 @@ try:
     imputer   = joblib.load(os.path.join(BASE_DIR, "imputer.pkl"))
     le_reason = joblib.load(os.path.join(BASE_DIR, "le_reason.pkl"))
     le_job    = joblib.load(os.path.join(BASE_DIR, "le_job.pkl"))
-    print("✅ All models loaded successfully!")
+    print("✅ Core models loaded (RF + imputer + encoders)")
 except Exception as e:
     print(f"⚠️  Model loading error: {e}")
     print("   Make sure all 4 .pkl files are in the backend/ folder")
     best_rf = imputer = le_reason = le_job = None
+
+# Optional: load Logistic Regression model + scaler for comparison
+try:
+    lr_model = joblib.load(os.path.join(BASE_DIR, "lr_model.pkl"))
+    scaler   = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
+    print("✅ LR model + scaler loaded for comparison")
+except Exception as e:
+    print(f"ℹ️  LR model not loaded (optional): {e}")
+    lr_model = scaler = None
 
 
 # ── Request schema ───────────────────────────────────────────────────────────
@@ -139,6 +148,8 @@ class RiskResult(BaseModel):
     decision:         str
     advice:           list[str]
     key_risk_factors: list[str]
+    rf_score:         float
+    lr_score:         float | None = None
 
 
 # ── Helper: build advice and detect risk factors ─────────────────────────────
@@ -240,8 +251,18 @@ def predict(application: LoanApplication):
     # Impute missing values
     df_imputed = pd.DataFrame(imputer.transform(df), columns=df.columns)
 
-    # Predict with Random Forest
+    # Predict with Random Forest (primary model — trained on unscaled data)
     rf_prob = float(best_rf.predict_proba(df_imputed)[0][1])
+
+    # Predict with Logistic Regression if available (trained on scaled data)
+    lr_prob = None
+    if lr_model is not None and scaler is not None:
+        try:
+            df_scaled = pd.DataFrame(scaler.transform(df_imputed), columns=df_imputed.columns)
+            lr_prob = float(lr_model.predict_proba(df_scaled)[0][1])
+        except Exception as e:
+            print(f"⚠️  LR prediction failed: {e}")
+            lr_prob = None
 
     # Determine risk level and color
     if rf_prob < 0.30:
@@ -264,6 +285,8 @@ def predict(application: LoanApplication):
         decision         = decision,
         advice           = advice,
         key_risk_factors = factors,
+        rf_score         = round(rf_prob, 4),
+        lr_score         = round(lr_prob, 4) if lr_prob is not None else None,
     )
 
 

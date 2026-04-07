@@ -3,194 +3,270 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CreditIQ — Risk Assessment</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<meta name="description" content="CreditIQ — AI-powered credit risk assessment using machine learning"/>
+<title>CreditIQ — Credit Risk Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<div class="wrapper">
+<div class="app">
 
-  <!-- Header -->
-  <header>
-    <div class="logo">
-      <div class="logo-icon">C</div>
-      <div class="logo-text">Credit<span>IQ</span></div>
+  <!-- Nav -->
+  <nav>
+    <div class="nav-left">
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="logo-name">CreditIQ</span>
     </div>
-    <span class="badge-api" id="api-badge">● Checking API…</span>
-  </header>
+    <div class="nav-right">
+      <span class="api-status" id="api-badge">
+        <span class="status-dot"></span>
+        Checking…
+      </span>
+    </div>
+  </nav>
 
   <!-- Hero -->
-  <div class="hero">
-    <h1>Loan Default Risk <em>Assessment</em></h1>
-    <p>Enter applicant details below. Our ML model will instantly predict default probability and provide financial guidance.</p>
-  </div>
+  <section class="hero">
+    <div class="hero-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+      ML-Powered Analysis
+    </div>
+    <h1>Credit Risk Assessment</h1>
+    <p>Enter applicant details to predict loan default probability using our trained Random Forest model.</p>
+  </section>
 
-  <!-- Main grid -->
-  <div class="main-grid">
+  <!-- Content -->
+  <div class="content-grid">
 
-    <!-- ── Left: Form ── -->
-    <div class="card">
-      <div class="card-title">Applicant Details</div>
+    <!-- Form Panel -->
+    <div class="panel form-panel">
+      <div class="panel-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        <h2>Applicant Details</h2>
+      </div>
+
+      <!-- Presets -->
+      <div class="preset-row">
+        <button type="button" class="preset-chip green" id="presetLow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Low Risk Sample
+        </button>
+        <button type="button" class="preset-chip red" id="presetHigh">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          High Risk Sample
+        </button>
+      </div>
 
       <form id="riskForm" novalidate>
 
-        <!-- Loan Info -->
-        <div class="section-label">Loan Information</div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Loan Amount (USD) <span class="tip" data-tip="Total amount the applicant wants to borrow">?</span></label>
-            <input type="number" id="loan" placeholder="e.g. 15000" min="1" required/>
+        <!-- Loan -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Loan Information
           </div>
-          <div class="field">
-            <label>Loan Reason <span class="tip" data-tip="HomeImp = Home improvement, DebtCon = Debt consolidation">?</span></label>
-            <select id="reason">
-              <option value="">Select reason</option>
-              <option value="HomeImp">Home Improvement</option>
-              <option value="DebtCon">Debt Consolidation</option>
-            </select>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="loan">Loan Amount <span class="tip" data-tip="The total loan amount requested by the applicant in USD">?</span></label>
+              <div class="input-wrap">
+                <span class="input-prefix">$</span>
+                <input type="number" id="loan" placeholder="15,000" min="1" required/>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="reason">Loan Purpose <span class="tip" data-tip="HomeImp = home improvement, DebtCon = debt consolidation">?</span></label>
+              <select id="reason">
+                <option value="">Select purpose</option>
+                <option value="HomeImp">Home Improvement</option>
+                <option value="DebtCon">Debt Consolidation</option>
+              </select>
+            </div>
           </div>
         </div>
 
         <!-- Property -->
-        <div class="section-label">Property & Mortgage</div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Property Value (USD) <span class="tip" data-tip="Current market value of the applicant's home">?</span></label>
-            <input type="number" id="value" placeholder="e.g. 120000" min="1" required/>
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Property & Mortgage
           </div>
-          <div class="field">
-            <label>Mortgage Still Owed (USD) <span class="tip" data-tip="Remaining balance on their existing home mortgage">?</span></label>
-            <input type="number" id="mortdue" placeholder="e.g. 80000" min="0" required/>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="value">Property Value <span class="tip" data-tip="Current appraised value of the property in USD">?</span></label>
+              <div class="input-wrap">
+                <span class="input-prefix">$</span>
+                <input type="number" id="value" placeholder="120,000" min="1" required/>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="mortdue">Mortgage Owed <span class="tip" data-tip="Amount still owed on the existing mortgage">?</span></label>
+              <div class="input-wrap">
+                <span class="input-prefix">$</span>
+                <input type="number" id="mortdue" placeholder="80,000" min="0" required/>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Employment -->
-        <div class="section-label">Employment</div>
-        <div class="field-grid">
-          <div class="field">
-            <label>Job Type <span class="tip" data-tip="Applicant's current employment category">?</span></label>
-            <select id="job">
-              <option value="">Select job type</option>
-              <option value="Mgr">Manager</option>
-              <option value="Office">Office</option>
-              <option value="ProfExe">Professional / Executive</option>
-              <option value="Sales">Sales</option>
-              <option value="Self">Self-Employed</option>
-              <option value="Other">Other</option>
-            </select>
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Employment
           </div>
-          <div class="field">
-            <label>Years at Current Job <span class="tip" data-tip="Stable employment reduces default risk">?</span></label>
-            <input type="number" id="yoj" placeholder="e.g. 7" min="0" step="0.5" required/>
-          </div>
-        </div>
-
-        <!-- Credit History -->
-        <div class="section-label">Credit History</div>
-        <div class="field-grid three">
-          <div class="field">
-            <label>Delinquencies <span class="tip" data-tip="Number of times they missed a credit payment — highest risk factor">?</span></label>
-            <input type="number" id="delinq" placeholder="e.g. 0" min="0" required/>
-          </div>
-          <div class="field">
-            <label>Derogatory Reports <span class="tip" data-tip="Serious past failures: bankruptcies, repossessions">?</span></label>
-            <input type="number" id="derog" placeholder="e.g. 0" min="0" required/>
-          </div>
-          <div class="field">
-            <label>Credit Inquiries <span class="tip" data-tip="How many times they recently applied for new credit">?</span></label>
-            <input type="number" id="ninq" placeholder="e.g. 2" min="0" required/>
-          </div>
-          <div class="field">
-            <label>Credit Lines Open <span class="tip" data-tip="Total number of open credit accounts">?</span></label>
-            <input type="number" id="clno" placeholder="e.g. 15" min="0" required/>
-          </div>
-          <div class="field">
-            <label>Oldest Credit (months) <span class="tip" data-tip="Age of their oldest credit account in months">?</span></label>
-            <input type="number" id="clage" placeholder="e.g. 180" min="0" required/>
-          </div>
-          <div class="field">
-            <label>Debt-to-Income % <span class="tip" data-tip="% of monthly income going to debt payments. Above 40% is risky">?</span></label>
-            <input type="number" id="debtinc" placeholder="e.g. 25.5" min="0" step="0.1" required/>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="job">Job Category <span class="tip" data-tip="Applicant's occupation category">?</span></label>
+              <select id="job">
+                <option value="">Select category</option>
+                <option value="Mgr">Manager</option>
+                <option value="Office">Office</option>
+                <option value="ProfExe">Professional / Executive</option>
+                <option value="Sales">Sales</option>
+                <option value="Self">Self-Employed</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="yoj">Years at Job <span class="tip" data-tip="Number of years at the applicant's current job">?</span></label>
+              <input type="number" id="yoj" placeholder="7" min="0" step="0.5" required/>
+            </div>
           </div>
         </div>
 
-        <button type="submit" class="btn-submit" id="submitBtn">
-          <span class="spinner" id="spinner" style="display:none"></span>
+        <!-- Credit -->
+        <div class="form-section">
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Credit History
+          </div>
+          <div class="form-row three">
+            <div class="form-field">
+              <label for="delinq">Delinquencies <span class="tip" data-tip="Number of delinquent credit lines (missed payments)">?</span></label>
+              <input type="number" id="delinq" placeholder="0" min="0" required/>
+            </div>
+            <div class="form-field">
+              <label for="derog">Derogatory Reports <span class="tip" data-tip="Major derogatory events like bankruptcies or repossessions">?</span></label>
+              <input type="number" id="derog" placeholder="0" min="0" required/>
+            </div>
+            <div class="form-field">
+              <label for="ninq">Credit Inquiries <span class="tip" data-tip="Number of recent credit inquiries (hard pulls)">?</span></label>
+              <input type="number" id="ninq" placeholder="2" min="0" required/>
+            </div>
+          </div>
+          <div class="form-row three">
+            <div class="form-field">
+              <label for="clno">Open Credit Lines <span class="tip" data-tip="Number of existing open credit lines">?</span></label>
+              <input type="number" id="clno" placeholder="15" min="0" required/>
+            </div>
+            <div class="form-field">
+              <label for="clage">Oldest Credit (mo) <span class="tip" data-tip="Age of the oldest credit line in months">?</span></label>
+              <input type="number" id="clage" placeholder="180" min="0" required/>
+            </div>
+            <div class="form-field">
+              <label for="debtinc">Debt-to-Income % <span class="tip" data-tip="Total monthly debt payments divided by gross monthly income">?</span></label>
+              <input type="number" id="debtinc" placeholder="25" min="0" step="0.1" required/>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           Assess Credit Risk
         </button>
       </form>
     </div>
 
-    <!-- ── Right: Results ── -->
-    <div class="result-panel">
-      <div id="resultEmpty" class="result-empty">
-        <div class="icon">📊</div>
-        <p>Fill in the form and click<br/><strong>Assess Credit Risk</strong><br/>to see results here.</p>
+    <!-- Results Panel -->
+    <div class="panel result-panel">
+      <!-- Empty state -->
+      <div id="resultEmpty" class="empty-state">
+        <div class="empty-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+        </div>
+        <p>Submit applicant details to<br/>view the risk assessment.</p>
       </div>
 
-      <div id="resultCard" class="card" style="display:none">
-        <div class="card-title">Assessment Result</div>
+      <!-- Result content -->
+      <div id="resultCard" style="display:none">
 
-        <!-- Gauge -->
-        <div class="gauge-wrap">
-          <svg class="gauge-svg" viewBox="0 0 220 120">
-            <!-- Track -->
-            <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#1a2236" stroke-width="14" stroke-linecap="round"/>
-            <!-- Fill -->
-            <path id="gaugeFill" d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#3b82f6" stroke-width="14" stroke-linecap="round"
-              stroke-dasharray="283" stroke-dashoffset="283"
-              style="transition:stroke-dashoffset 1.2s cubic-bezier(.25,.46,.45,.94),stroke 0.6s"/>
-            <!-- Ticks -->
-            <text x="14" y="118" fill="#4b5563" font-size="10" font-family="DM Mono">0</text>
-            <text x="100" y="28" fill="#4b5563" font-size="10" font-family="DM Mono" text-anchor="middle">50</text>
-            <text x="197" y="118" fill="#4b5563" font-size="10" font-family="DM Mono" text-anchor="end">100</text>
-          </svg>
-          <div class="gauge-label" id="gaugeLabel">—</div>
-          <div class="gauge-sub">Default probability</div>
-        </div>
-
-        <!-- Risk badge -->
-        <div style="text-align:center;margin-bottom:20px">
-          <span class="risk-badge" id="riskBadge">—</span>
-        </div>
-
-        <!-- Decision -->
-        <div class="decision-box" id="decisionBox">
-          <div class="dec-label" id="decLabel">Decision</div>
-          <div class="dec-text" id="decText">—</div>
-        </div>
-
-        <!-- Model comparison -->
-        <div style="margin-bottom:20px">
-          <div class="card-title" style="margin-bottom:14px">Model Comparison</div>
-          <div class="compare-row" id="rfRow">
-            <div class="compare-head"><span>Random Forest (main)</span><span id="rfPct">—</span></div>
-            <div class="bar-track"><div class="bar-fill" id="rfBar" style="width:0%;background:#3b82f6"></div></div>
+        <!-- Score ring -->
+        <div class="score-section">
+          <div class="score-ring-wrap">
+            <svg class="score-ring" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+              <circle id="scoreRing" cx="60" cy="60" r="52" fill="none" stroke="#3b82f6" stroke-width="8"
+                stroke-dasharray="327" stroke-dashoffset="327" stroke-linecap="round"
+                transform="rotate(-90 60 60)"
+                style="transition:stroke-dashoffset 1.2s cubic-bezier(.25,.46,.45,.94),stroke 0.6s"/>
+            </svg>
+            <div class="score-value" id="scoreValue">—</div>
           </div>
-          <div class="compare-row" id="lrRow" style="margin-top:12px">
-            <div class="compare-head"><span>Logistic Regression</span><span id="lrPct">—</span></div>
-            <div class="bar-track"><div class="bar-fill" id="lrBar" style="width:0%;background:#8b5cf6"></div></div>
+          <div class="score-label">Default Probability</div>
+        </div>
+
+        <!-- Risk + Decision -->
+        <div class="status-row">
+          <div class="status-pill" id="riskPill">
+            <span class="pill-dot"></span>
+            <span id="riskText">—</span>
+          </div>
+          <div class="decision-pill" id="decisionPill">
+            <span id="decisionText">—</span>
           </div>
         </div>
 
-        <!-- Key risk factors -->
-        <div style="margin-bottom:20px">
-          <div class="card-title" style="margin-bottom:10px">Key Risk Factors</div>
-          <div id="factorsWrap"></div>
+        <!-- Model Comparison -->
+        <div class="result-section">
+          <div class="section-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            Model Comparison
+          </div>
+          <div class="model-bar" id="rfRow">
+            <div class="model-info">
+              <span class="model-name" id="rfName">Random Forest</span>
+              <span class="model-pct" id="rfPct">—</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill rf" id="rfBar"></div></div>
+          </div>
+          <div class="model-bar" id="lrRow">
+            <div class="model-info">
+              <span class="model-name" id="lrName">Logistic Regression</span>
+              <span class="model-pct" id="lrPct">—</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill lr" id="lrBar"></div></div>
+          </div>
+        </div>
+
+        <!-- Risk Factors -->
+        <div class="result-section">
+          <div class="section-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Risk Factors
+          </div>
+          <div id="factorsWrap" class="factors-wrap"></div>
         </div>
 
         <!-- Advice -->
-        <div>
-          <div class="card-title" style="margin-bottom:10px">Financial Guidance</div>
+        <div class="result-section">
+          <div class="section-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Recommendation
+          </div>
           <ul class="advice-list" id="adviceList"></ul>
         </div>
+
       </div>
     </div>
 
-  </div><!-- /main-grid -->
-</div><!-- /wrapper -->
+  </div><!-- /content-grid -->
+</div><!-- /app -->
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

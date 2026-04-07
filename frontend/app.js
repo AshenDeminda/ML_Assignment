@@ -1,28 +1,30 @@
 const API = 'http://127.0.0.1:8000';
 
-// ── Check API status on load ─────────────────────────────
+// ── Check API status ─────────────────────────────────────
 async function checkAPI() {
   const badge = document.getElementById('api-badge');
   try {
     const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) });
     if (r.ok) {
-      badge.textContent = '● API Online';
-      badge.classList.remove('offline');
+      badge.textContent = '';
+      badge.innerHTML = '<span class="status-dot"></span> Online';
+      badge.className = 'api-status online';
     } else throw new Error();
   } catch {
-    badge.textContent = '● API Offline';
-    badge.classList.add('offline');
+    badge.textContent = '';
+    badge.innerHTML = '<span class="status-dot"></span> Offline';
+    badge.className = 'api-status offline';
   }
 }
 checkAPI();
 
-// ── Gauge animation ──────────────────────────────────────
-function setGauge(pct, color) {
-  const fill = document.getElementById('gaugeFill');
-  const totalLength = 283;
-  const offset = totalLength - (totalLength * pct / 100);
-  fill.style.strokeDashoffset = offset;
-  fill.style.stroke = color;
+// ── Score ring animation ─────────────────────────────────
+function setScore(pct, color) {
+  const ring = document.getElementById('scoreRing');
+  const circumference = 327; // 2 * PI * 52
+  const offset = circumference - (circumference * pct / 100);
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = color;
 }
 
 // ── Render result ────────────────────────────────────────
@@ -30,55 +32,52 @@ function renderResult(data) {
   document.getElementById('resultEmpty').style.display = 'none';
   const card = document.getElementById('resultCard');
   card.style.display = 'block';
-  card.classList.add('animate-in');
+  card.className = 'animate-in';
 
-  // Gauge
-  document.getElementById('gaugeLabel').textContent = `${data.risk_percent}%`;
-  document.getElementById('gaugeLabel').style.color = data.risk_color;
-  setTimeout(() => setGauge(data.risk_percent, data.risk_color), 100);
+  // Score ring
+  const scoreVal = document.getElementById('scoreValue');
+  scoreVal.textContent = `${data.risk_percent}%`;
+  scoreVal.style.color = data.risk_color;
+  setTimeout(() => setScore(data.risk_percent, data.risk_color), 100);
 
-  // Risk badge
-  const badge = document.getElementById('riskBadge');
-  badge.textContent = data.risk_level;
-  badge.style.background = data.risk_color + '18';
-  badge.style.color = data.risk_color;
-  badge.style.border = `1px solid ${data.risk_color}40`;
+  // Risk pill
+  const riskPill = document.getElementById('riskPill');
+  riskPill.style.background = data.risk_color + '14';
+  riskPill.style.color = data.risk_color;
+  riskPill.querySelector('.pill-dot').style.background = data.risk_color;
+  document.getElementById('riskText').textContent = data.risk_level;
 
-  // Decision box
-  const decBox = document.getElementById('decisionBox');
-  const decColors = { APPROVE: '#10b981', CONDITIONAL: '#f59e0b', DECLINE: '#ef4444' };
-  const c = decColors[data.decision] || '#3b82f6';
-  decBox.style.borderLeftColor = c;
-  decBox.style.background = c + '0d';
-  document.getElementById('decLabel').textContent = data.decision;
-  document.getElementById('decLabel').style.color = c;
-  const decTexts = {
-    APPROVE: 'This applicant shows strong repayment likelihood. Recommend approval.',
-    CONDITIONAL: 'Approval possible with additional conditions and higher interest rate.',
-    DECLINE: 'Default risk is too high. Recommend declining at this time.'
-  };
-  document.getElementById('decText').textContent = decTexts[data.decision];
+  // Decision pill
+  const decPill = document.getElementById('decisionPill');
+  const decColors = { APPROVE: '#30d158', CONDITIONAL: '#ff9f0a', DECLINE: '#ff453a' };
+  const dc = decColors[data.decision] || '#0a84ff';
+  decPill.style.background = dc + '14';
+  decPill.style.color = dc;
+  document.getElementById('decisionText').textContent = data.decision;
 
-  // Comparison bars (backend may only return a single score)
+  // Model comparison
   const rfScore = (typeof data.rf_score === 'number') ? data.rf_score : data.risk_score;
   const lrScore = (typeof data.lr_score === 'number') ? data.lr_score : null;
 
-  document.getElementById('rfPct').textContent = (typeof rfScore === 'number')
-    ? `${(rfScore * 100).toFixed(1)}%`
-    : '—';
-
+  const rfName = document.getElementById('rfName');
   const lrRow = document.getElementById('lrRow');
-  if (lrScore === null) {
-    lrRow.style.display = 'none';
-  } else {
+
+  if (lrScore !== null) {
+    // For risk: lower score = better model at detecting safe applicants
+    // The "BEST" badge goes on the model that is considered primary (RF, since it has higher AUC)
+    rfName.innerHTML = 'Random Forest <span class="best-tag">PRIMARY</span>';
     lrRow.style.display = '';
+    document.getElementById('lrName').textContent = 'Logistic Regression';
     document.getElementById('lrPct').textContent = `${(lrScore * 100).toFixed(1)}%`;
+  } else {
+    rfName.textContent = 'Random Forest';
+    lrRow.style.display = 'none';
   }
 
+  document.getElementById('rfPct').textContent = `${(rfScore * 100).toFixed(1)}%`;
+
   setTimeout(() => {
-    document.getElementById('rfBar').style.width = (typeof rfScore === 'number')
-      ? `${rfScore * 100}%`
-      : '0%';
+    document.getElementById('rfBar').style.width = `${rfScore * 100}%`;
     if (lrScore !== null) {
       document.getElementById('lrBar').style.width = `${lrScore * 100}%`;
     }
@@ -89,9 +88,9 @@ function renderResult(data) {
   fw.innerHTML = '';
   data.key_risk_factors.forEach(f => {
     const tag = document.createElement('span');
-    const isNone = f.toLowerCase().includes('no major');
-    tag.className = 'factor-tag' + (isNone ? ' none' : '');
-    tag.textContent = (isNone ? '✓ ' : '⚠ ') + f;
+    const isOk = f.toLowerCase().includes('no major');
+    tag.className = 'factor-tag' + (isOk ? ' ok' : '');
+    tag.textContent = f;
     fw.appendChild(tag);
   });
 
@@ -100,22 +99,22 @@ function renderResult(data) {
   ul.innerHTML = '';
   data.advice.forEach(a => {
     const li = document.createElement('li');
-    li.textContent = a;
+    li.innerHTML = `<svg class="advice-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>${a}`;
     ul.appendChild(li);
   });
 }
 
-// ── Show error in result panel ───────────────────────────
+// ── Show error ───────────────────────────────────────────
 function showError(msg) {
-  document.getElementById('resultEmpty').style.display = 'none';
-  const card = document.getElementById('resultCard');
-  card.style.display = 'block';
-  card.innerHTML = `
-    <div style="text-align:center;padding:40px 20px;color:#ef4444">
-      <div style="font-size:32px;margin-bottom:12px">⚠️</div>
-      <div style="font-weight:600;margin-bottom:6px">API Error</div>
-      <div style="font-size:13px;color:#7c8ba1">${msg}</div>
-      <div style="margin-top:16px;font-size:12px;color:#4b5563">Make sure uvicorn is running on port 8000</div>
+  document.getElementById('resultCard').style.display = 'none';
+  const empty = document.getElementById('resultEmpty');
+  empty.style.display = 'flex';
+  empty.innerHTML = `
+    <div style="text-align:center">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <div style="font-weight:600;color:#ff453a;margin-bottom:4px">Connection Error</div>
+      <div style="font-size:12px;color:#6e6e73">${msg}</div>
+      <div style="font-size:11px;color:#3a3a3c;margin-top:12px">Ensure the backend is running on port 8000</div>
     </div>`;
 }
 
@@ -123,6 +122,7 @@ function showError(msg) {
 document.getElementById('riskForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const btn = document.getElementById('submitBtn');
   const get = id => document.getElementById(id).value;
 
   // Validate
@@ -139,29 +139,26 @@ document.getElementById('riskForm').addEventListener('submit', async (e) => {
   });
   if (!valid) return;
 
-  // Loading state
-  const btn = document.getElementById('submitBtn');
-  const spinner = document.getElementById('spinner');
+  // Loading
   btn.disabled = true;
-  spinner.style.display = 'inline-block';
-  btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle"></span> Analysing…';
-
-  const payload = {
-    loan: parseFloat(get('loan')),
-    mortdue: parseFloat(get('mortdue')),
-    value: parseFloat(get('value')),
-    reason: get('reason'),
-    job: get('job'),
-    yoj: parseFloat(get('yoj')),
-    derog: parseFloat(get('derog')),
-    delinq: parseFloat(get('delinq')),
-    clage: parseFloat(get('clage')),
-    ninq: parseFloat(get('ninq')),
-    clno: parseFloat(get('clno')),
-    debtinc: parseFloat(get('debtinc'))
-  };
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite"></span> Analysing…';
 
   try {
+    const payload = {
+      loan: parseFloat(get('loan')),
+      mortdue: parseFloat(get('mortdue')),
+      value: parseFloat(get('value')),
+      reason: get('reason'),
+      job: get('job'),
+      yoj: parseFloat(get('yoj')),
+      derog: parseFloat(get('derog')),
+      delinq: parseFloat(get('delinq')),
+      clage: parseFloat(get('clage')),
+      ninq: parseFloat(get('ninq')),
+      clno: parseFloat(get('clno')),
+      debtinc: parseFloat(get('debtinc'))
+    };
+
     const res = await fetch(`${API}/predict`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -179,11 +176,31 @@ document.getElementById('riskForm').addEventListener('submit', async (e) => {
     showError(err.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = 'Assess Credit Risk';
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Assess Credit Risk';
   }
 });
 
-// ── Remove invalid class on input ────────────────────────
+// ── Input helpers ────────────────────────────────────────
 document.querySelectorAll('input,select').forEach(el => {
   el.addEventListener('input', () => el.classList.remove('invalid'));
+  if (el.tagName === 'INPUT') {
+    el.addEventListener('focus', () => el.select());
+  }
 });
+
+// ── Presets ───────────────────────────────────────────────
+const PRESETS = {
+  low:  { loan: 15000, value: 120000, mortdue: 60000, reason: 'HomeImp', job: 'Mgr',  yoj: 9, delinq: 0, derog: 0, ninq: 1, clno: 15, clage: 200, debtinc: 18 },
+  high: { loan: 45000, value: 95000,  mortdue: 90000, reason: 'DebtCon', job: 'Self', yoj: 1, delinq: 5, derog: 3, ninq: 8, clno: 4,  clage: 30,  debtinc: 72 }
+};
+
+function fillPreset(type) {
+  const data = PRESETS[type];
+  Object.entries(data).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) { el.value = val; el.classList.remove('invalid'); }
+  });
+}
+
+document.getElementById('presetLow').addEventListener('click', () => fillPreset('low'));
+document.getElementById('presetHigh').addEventListener('click', () => fillPreset('high'));
